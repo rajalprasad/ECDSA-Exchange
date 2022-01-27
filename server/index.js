@@ -17,13 +17,15 @@ const accounts = [];
 const initialBalances = [1000, 500, 100]; 
 
 for (let i = 0; i < initialBalances.length; i++) {
+  //Key generation
   const key = ec.genKeyPair();
   const privateKey = key.getPrivate('hex');
   const publicKey = key.getPublic('hex');
-
+  //Associating private and public keys
   accounts[publicKey] = privateKey;
+  //Applying initial balances
   balances[publicKey] = initialBalances[i];
-
+  //Logging keys and balances to the console
   console.log(`${i};`);
   console.log(`Private Key: ${privateKey}`);
   console.log(`Public Key: ${publicKey}`);
@@ -33,11 +35,8 @@ for (let i = 0; i < initialBalances.length; i++) {
 app.get('/balance/:address', (req, res) => {
   const {address} = req.params;
   console.log(`/balance/:address => address = ${address}`);
-
   const balance = balances[address] || 0;
-
   const pk = accounts[address];
-
   res.send({ pk, balance });
 });
 
@@ -45,13 +44,9 @@ app.post('/send', (req, res) => {
 
   const { messageString, signature } = req.body;
   const message = JSON.parse(messageString);
-
   const {sender, recipient, amount} = message;
-
   const key = ec.keyFromPublic(sender, 'hex');
-
   const messageDigest = sha256(messageString).toString();
-
   const verified = key.verify(messageDigest, signature);
 
   if (verified) {
